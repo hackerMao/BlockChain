@@ -7,7 +7,7 @@ import (
 
 type Block struct {
 	// 前区块hash值
-	PrevHash []byte // TODO：先留空，后边计算
+	PrevHash []byte
 	Hash     []byte
 	Data     []byte
 }
