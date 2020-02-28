@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/binary"
 	"log"
 	"time"
@@ -38,10 +37,18 @@ func NewBlock(PrevBlockHash []byte, data string) *Block {
 		Hash:       []byte{},
 		Data:       []byte(data),
 	}
-	block.SetHash()
+	//block.SetHash()
+	// 创建一个工作量证明
+	pow := NewProofWork(&block)
+	// 查找随机数、不停进行hash运算。
+	hash, nonce := pow.Run()
+	// 更新区块信息
+	block.Hash = hash
+	block.Nonce = nonce
 	return &block
 }
 
+/*
 // 生成hash
 func (self *Block) SetHash() {
 	var blockInfo []byte
@@ -57,6 +64,7 @@ func (self *Block) SetHash() {
 	hash := sha256.Sum256(blockInfo)
 	self.Hash = hash[:]
 }
+*/
 
 func Uint64ToByte(num uint64) []byte {
 	var buffer bytes.Buffer
