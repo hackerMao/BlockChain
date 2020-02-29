@@ -26,6 +26,10 @@ type Block struct {
 	Data []byte
 }
 
+func (block *Block) toBytes() []byte {
+	return []byte{}
+}
+
 func NewBlock(PrevBlockHash []byte, data string) *Block {
 	block := Block{
 		Version:    00,
