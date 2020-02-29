@@ -63,10 +63,22 @@ func GenesisBlock() *Block {
 }
 
 func (self *BlockChain) AddBlock(data string) {
-	// 获取区块链中最后一个区块，取该区块的哈希值作为上一个哈希值
-	//lastlock := self.blocks[len(self.blocks)-1]
-	//// 新建一个区块
-	//block := NewBlock(lastlock.Hash, data)
-	//// 添加区块
-	//self.blocks = append(self.blocks, block)
+	// 连接数据库
+	db := self.db
+	lastHash := self.tail
+	// 更新
+	db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(blockBucket))
+		if bucket == nil {
+			log.Panic("数据库bucket异常，请检查")
+		}
+		// 创建区块
+		block := NewBlock(lastHash, data)
+		// 添加到区块链并更新lastHash
+		bucket.Put(block.Hash, block.Serialize())
+		bucket.Put([]byte(lastBlockHashKey), block.Hash)
+		// 更新内存中区块链的最后一个hash
+		self.tail = block.Hash
+		return nil
+	})
 }
