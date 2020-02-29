@@ -37,11 +37,16 @@ func NewBlockChain() *BlockChain {
 			// 创建第一个区块--创世块
 			genesisBlock := GenesisBlock()
 			// 将创世块写入链中
-			bucket.Put(genesisBlock.Hash, genesisBlock.toBytes())
+			bucket.Put(genesisBlock.Hash, genesisBlock.Serialize())
 			// 更新最后一个区块的hash
 			bucket.Put([]byte(lastBlockHashKey), genesisBlock.Hash)
-			// 将lastHash写入内存中
+			// 将lastHash写入内存中s
 			lastHash = genesisBlock.Hash
+
+			// 测试
+			//blockBytes := bucket.Get(genesisBlock.Hash)
+			//block := Deserialize(blockBytes)
+			//fmt.Println(block)
 		} else {
 			lastHash = bucket.Get([]byte(lastBlockHashKey))
 		}
