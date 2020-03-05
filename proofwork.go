@@ -1,4 +1,5 @@
 package main
+// 工作量证明/挖矿
 
 import (
 	"bytes"
@@ -39,7 +40,6 @@ func (pow *ProofOfWork) Run() ([]byte, uint64) {
 			block.MerkalRoot,
 			Uint64ToByte(nonce),
 			Uint64ToByte(block.TimeStamp),
-			block.Data,
 		}
 		//fmt.Println(nonce)
 		blockInfo := bytes.Join(temp, []byte{})

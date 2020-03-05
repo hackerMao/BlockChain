@@ -1,4 +1,5 @@
 package main
+// 客户端命令控制工具
 
 import (
 	"fmt"
@@ -14,6 +15,7 @@ const Usage = `
 		addBlock --data Data      "添加区块"
 		printChain                "正向打印区块"
 		printChainR               "反向打印区块"
+		getBalance --address addr "获取账户余额"
 `
 
 func (self *Cli) Run() {
@@ -42,6 +44,14 @@ func (self *Cli) Run() {
 	case "printChainR":
 		fmt.Println("反向打印区块")
 		self.printChain()
+	case "getBalance":
+		if len(args) == 4 && args[2] == "--address" {
+			address := args[3]
+			self.GetBalance(address)
+		} else {
+			fmt.Println("参数错误")
+			fmt.Printf(Usage)
+		}
 	default:
 		fmt.Printf("Command '%s' not found, did you mean:\n", cmd)
 		fmt.Printf(Usage)

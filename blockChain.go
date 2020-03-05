@@ -1,13 +1,15 @@
 package main
 
+//区块链
 import (
+	"fmt"
 	"github.com/boltdb/bolt"
 	"log"
 )
 
 const (
-	blockChainDb  = "blockChain.db"
-	blockBucket   = "blockBucket"
+	blockChainDb     = "blockChain.db"
+	blockBucket      = "blockBucket"
 	lastBlockHashKey = "lastBlockHashKey"
 )
 
@@ -19,7 +21,7 @@ type BlockChain struct {
 	tail []byte // 存储最有后一个区块hash值
 }
 
-func NewBlockChain() *BlockChain {
+func NewBlockChain(address string) *BlockChain {
 	var lastHash []byte
 	db, err := bolt.Open(blockChainDb, 0600, nil)
 	if err != nil {
@@ -35,12 +37,12 @@ func NewBlockChain() *BlockChain {
 				log.Panic("创建bucket失败")
 			}
 			// 创建第一个区块--创世块
-			genesisBlock := GenesisBlock()
+			genesisBlock := GenesisBlock(address)
 			// 将创世块写入链中
 			bucket.Put(genesisBlock.Hash, genesisBlock.Serialize())
 			// 更新最后一个区块的hash
 			bucket.Put([]byte(lastBlockHashKey), genesisBlock.Hash)
-			// 将lastHash写入内存中s
+			// 将lastHash写入内存中
 			lastHash = genesisBlock.Hash
 
 			// 测试
@@ -58,11 +60,12 @@ func NewBlockChain() *BlockChain {
 	}
 }
 
-func GenesisBlock() *Block {
-	return NewBlock([]byte{}, "这是区块链的第一个区块！")
+func GenesisBlock(address string) *Block {
+	coinBase := NewCoinBaseTX(address, "创世块天下第一")
+	return NewBlock([]byte{}, []*Transaction{coinBase})
 }
 
-func (self *BlockChain) AddBlock(data string) {
+func (self *BlockChain) AddBlock(txs []*Transaction) {
 	// 连接数据库
 	db := self.db
 	lastHash := self.tail
@@ -73,7 +76,7 @@ func (self *BlockChain) AddBlock(data string) {
 			log.Panic("数据库bucket异常，请检查")
 		}
 		// 创建区块
-		block := NewBlock(lastHash, data)
+		block := NewBlock(lastHash, txs)
 		// 添加到区块链并更新lastHash
 		bucket.Put(block.Hash, block.Serialize())
 		bucket.Put([]byte(lastBlockHashKey), block.Hash)
@@ -81,4 +84,51 @@ func (self *BlockChain) AddBlock(data string) {
 		self.tail = block.Hash
 		return nil
 	})
+}
+
+func (self *BlockChain) FindUTXOs(address string) []TXOutput {
+	var UTXO []TXOutput
+	//定义一个map来保存以消费掉的output
+	spendOutputs := make(map[string][]int64)
+	// 创建区块链迭代器
+	it := self.NewIterator()
+	// 遍历所有区块
+	for {
+		block := it.Next()
+		// 遍历区块的交易
+		for _, tx := range block.Transaction {
+			fmt.Printf("current txid: %x\n", tx.TXID)
+			// 遍历交易中的所有output
+		OUTPUT:
+			for i, output := range tx.TxOutputs {
+				//fmt.Println(output)
+				// 过滤掉已花费的output
+				if spendOutputs[string(tx.TXID)] != nil {
+					// 通过交易ID 找到该次交易花费过的utxo索引值
+					for _, j := range spendOutputs[string(tx.TXID)] {
+						if int64(i) == j {
+							continue OUTPUT
+						}
+					}
+				}
+				// 添加满足条件的output
+				if output.PubKeyHash == address {
+					UTXO = append(UTXO, output)
+				}
+			}
+			// 遍历input,找到自己花费过的utxo的集合
+			for _, input := range tx.TXInputs {
+				if input.Sig == address {
+					// 记录交易ID和该场交易下属于我的花费
+					arrayIndex := spendOutputs[string(tx.TXID)]
+					arrayIndex = append(arrayIndex, input.Index)
+				}
+			}
+		}
+		if len(block.PrevHash) == 0 {
+			fmt.Printf("区块遍历结束\n")
+			break
+		}
+	}
+	return UTXO
 }

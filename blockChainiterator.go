@@ -1,4 +1,5 @@
 package main
+// 区块链迭代器
 
 import (
 	"github.com/boltdb/bolt"

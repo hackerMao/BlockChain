@@ -1,5 +1,5 @@
 package main
-
+// 区块
 import (
 	"bytes"
 	"encoding/binary"
@@ -13,7 +13,7 @@ type Block struct {
 	Version uint64
 	// 前区块hash值
 	PrevHash []byte
-	// Merkal根（梅卡尔根），交易时产生呢的hash值
+	// Merkal根（梅卡尔根），交易时产生的hash值:对交易进行二叉树hash
 	MerkalRoot []byte
 	// 时间戳
 	TimeStamp uint64
@@ -24,7 +24,8 @@ type Block struct {
 	// 当前哈希值，正常情况下比特币中没有当前hash值
 	Hash []byte
 	// 数据
-	Data []byte
+	//Data []byte
+	Transaction []*Transaction
 }
 
 func (self *Block) Serialize() []byte {
@@ -39,6 +40,12 @@ func (self *Block) Serialize() []byte {
 	return buffer.Bytes()
 }
 
+// 模拟梅克尔根，只是对交易的数据作简单的拼接，而不做二叉树处理
+func (self *Block) MakeMerkalRoot() []byte {
+	//TODO
+	return []byte{}
+}
+
 func Deserialize(b []byte) Block {
 	// 新建一个解码器
 	var block Block
@@ -51,18 +58,18 @@ func Deserialize(b []byte) Block {
 	return block
 }
 
-func NewBlock(PrevBlockHash []byte, data string) *Block {
+func NewBlock(PrevBlockHash []byte, txs []*Transaction) *Block {
 	block := Block{
-		Version:    00,
-		PrevHash:   PrevBlockHash,
-		MerkalRoot: []byte{},
-		TimeStamp:  uint64(time.Now().Unix()),
-		Difficulty: 0,
-		Nonce:      0,
-		Hash:       []byte{},
-		Data:       []byte(data),
+		Version:     00,
+		PrevHash:    PrevBlockHash,
+		MerkalRoot:  []byte{},
+		TimeStamp:   uint64(time.Now().Unix()),
+		Difficulty:  0,
+		Nonce:       0,
+		Hash:        []byte{},
+		Transaction: txs,
 	}
-	//block.SetHash()
+	block.MerkalRoot = block.MakeMerkalRoot()
 	// 创建一个工作量证明
 	pow := NewProofWork(&block)
 	// 查找随机数、不停进行hash运算。
