@@ -1,4 +1,5 @@
 package main
+
 // 命令行解析库
 import "fmt"
 
@@ -35,4 +36,12 @@ func (self *Cli) GetBalance(address string) {
 		total += utxo.Value
 	}
 	fmt.Printf("余额为：%f\n", total)
+}
+
+func (self *Cli) Send(from, to string, amount float64, miner, data string) {
+	fmt.Println("from: ", from)
+	fmt.Println("to: ", to)
+	fmt.Printf("amount: %f bitcorn\n", amount)
+	fmt.Println("miner: ", miner)
+	fmt.Println("data: ", data)
 }

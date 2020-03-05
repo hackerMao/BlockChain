@@ -1,9 +1,12 @@
 package main
+
 // 客户端命令控制工具
 
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"time"
 )
 
 type Cli struct {
@@ -16,6 +19,7 @@ const Usage = `
 		printChain                "正向打印区块"
 		printChainR               "反向打印区块"
 		getBalance --address addr "获取账户余额"
+		send -f from -t to -a amount -m miner -d data "from向to转账amount比特币，由miner挖矿，并写入data"
 `
 
 func (self *Cli) Run() {
@@ -52,6 +56,19 @@ func (self *Cli) Run() {
 			fmt.Println("参数错误")
 			fmt.Printf(Usage)
 		}
+	case "send":
+		fmt.Println("正在转账中，请等待...")
+		//  1               5      7         9       10
+		// send -f from -t to -a amount -m miner -d data
+		from := args[3]
+		to := args[5]
+		amount, _ := strconv.ParseFloat(args[7], 64)
+		miner := args[9]
+		data := args[11]
+		time.Sleep(time.Second*3)
+		self.Send(from, to, amount, miner, data)
+		time.Sleep(time.Second*3)
+		fmt.Println("转账成功！谢谢班长")
 	default:
 		fmt.Printf("Command '%s' not found, did you mean:\n", cmd)
 		fmt.Printf(Usage)
