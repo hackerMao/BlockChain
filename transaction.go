@@ -61,4 +61,15 @@ func NewCoinBaseTX(address string, data string) *Transaction {
 	return &tx
 }
 
-// 创建挖矿交易
+func (self *Transaction) IsCoinBase() bool {
+	// 判断是否是挖矿交易
+	// 只有一个交易input
+	if len(self.TXInputs) == 1 {
+		// 交易ID 为空
+		// 交易的index：-1
+		input := self.TXInputs[0]
+		if bytes.Equal(input.TXid, []byte{}) && input.Index == -1 {}
+		return true
+	}
+	return false
+}
