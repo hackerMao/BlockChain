@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"time"
 )
 
 type Cli struct {
@@ -65,10 +64,10 @@ func (self *Cli) Run() {
 		amount, _ := strconv.ParseFloat(args[7], 64)
 		miner := args[9]
 		data := args[11]
-		time.Sleep(time.Second*3)
-		self.Send(from, to, amount, miner, data)
-		time.Sleep(time.Second*3)
-		fmt.Println("转账成功！谢谢班长")
+		ok := self.Send(from, to, amount, miner, data)
+		if ok {
+			fmt.Println("转账成功！谢谢班长")
+		}
 	default:
 		fmt.Printf("Command '%s' not found, did you mean:\n", cmd)
 		fmt.Printf(Usage)

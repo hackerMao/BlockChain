@@ -77,6 +77,7 @@ func (self *Transaction) IsCoinBase() bool {
 
 func NewTransaction(from, to string, amount float64, bc *BlockChain) *Transaction {
 	// 找到合理的UTXO
+
 	utxos, resValue := bc.FindNeedUtxos(from, amount)
 	// 与目标金额相比较，不足则返回
 	if resValue < amount {
@@ -100,5 +101,6 @@ func NewTransaction(from, to string, amount float64, bc *BlockChain) *Transactio
 	}
 	tx := Transaction{[]byte{}, inputs, outputs}
 	tx.SetHash()
+	fmt.Println("tx:", tx)
 	return &tx
 }

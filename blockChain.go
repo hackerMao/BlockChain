@@ -85,7 +85,7 @@ func (self *BlockChain) AddBlock(txs []*Transaction) {
 		return nil
 	})
 }
-
+// 查找所有可用的UTXO
 func (self *BlockChain) FindUTXOs(address string) []TXOutput {
 	var UTXO []TXOutput
 	//定义一个map来保存以消费掉的output

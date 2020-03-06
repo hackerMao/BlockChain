@@ -38,10 +38,22 @@ func (self *Cli) GetBalance(address string) {
 	fmt.Printf("余额为：%f\n", total)
 }
 
-func (self *Cli) Send(from, to string, amount float64, miner, data string) {
+func (self *Cli) Send(from, to string, amount float64, miner, data string) bool {
+	// 创建挖矿交易
+	coinBase := NewCoinBaseTX(miner, data)
+	// 创建普通交易
+	tx := NewTransaction(from, to, amount, self.bc)
+	if tx == nil {
+		return false
+	}
+	// 添加区块
+	fmt.Println(tx)
+	self.bc.AddBlock([]*Transaction{coinBase, tx})
+
 	fmt.Println("from: ", from)
 	fmt.Println("to: ", to)
 	fmt.Printf("amount: %f bitcorn\n", amount)
 	fmt.Println("miner: ", miner)
 	fmt.Println("data: ", data)
+	return true
 }

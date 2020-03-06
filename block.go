@@ -35,7 +35,7 @@ func (self *Block) Serialize() []byte {
 	//使用编码器对block进行编码
 	err := encoder.Encode(self)
 	if err != nil {
-		log.Panic("编码失败")
+		log.Panic("编码失败:",err)
 	}
 	return buffer.Bytes()
 }
