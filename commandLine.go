@@ -47,7 +47,6 @@ func (self *Cli) Send(from, to string, amount float64, miner, data string) bool 
 		return false
 	}
 	// 添加区块
-	fmt.Println(tx)
 	self.bc.AddBlock([]*Transaction{coinBase, tx})
 
 	fmt.Println("from: ", from)

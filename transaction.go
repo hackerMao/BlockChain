@@ -101,6 +101,5 @@ func NewTransaction(from, to string, amount float64, bc *BlockChain) *Transactio
 	}
 	tx := Transaction{[]byte{}, inputs, outputs}
 	tx.SetHash()
-	fmt.Println("tx:", tx)
 	return &tx
 }

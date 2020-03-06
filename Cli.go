@@ -56,7 +56,7 @@ func (self *Cli) Run() {
 			fmt.Printf(Usage)
 		}
 	case "send":
-		fmt.Println("正在转账中，请等待...")
+		fmt.Println("正在执行中，请等待...")
 		//  1               5      7         9       10
 		// send -f from -t to -a amount -m miner -d data
 		from := args[3]

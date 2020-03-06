@@ -97,8 +97,17 @@ func (self *BlockChain) FindUTXOs(address string) []TXOutput {
 		block := it.Next()
 		// 遍历区块的交易
 		for _, tx := range block.Transaction {
-			fmt.Printf("current txid: %x\n", tx.TXID)
 			// 遍历交易中的所有output
+			if !tx.IsCoinBase() {
+				// 遍历input,找到自己花费过的utxo的集合
+				for _, input := range tx.TXInputs {
+					if input.Sig == address {
+						// 记录交易ID和该场交易下属于我的花费
+						arrayIndex := spendOutputs[string(tx.TXID)]
+						arrayIndex = append(arrayIndex, input.Index)
+					}
+				}
+			}
 		OUTPUT:
 			for i, output := range tx.TxOutputs {
 				//fmt.Println(output)
@@ -116,16 +125,6 @@ func (self *BlockChain) FindUTXOs(address string) []TXOutput {
 					UTXO = append(UTXO, output)
 				}
 			}
-			if !tx.IsCoinBase() {
-				// 遍历input,找到自己花费过的utxo的集合
-				for _, input := range tx.TXInputs {
-					if input.Sig == address {
-						// 记录交易ID和该场交易下属于我的花费
-						arrayIndex := spendOutputs[string(tx.TXID)]
-						arrayIndex = append(arrayIndex, input.Index)
-					}
-				}
-			}
 		}
 		if len(block.PrevHash) == 0 {
 			fmt.Printf("区块遍历结束\n")
@@ -136,7 +135,59 @@ func (self *BlockChain) FindUTXOs(address string) []TXOutput {
 }
 
 func (self *BlockChain) FindNeedUtxos(from string, amount float64) (map[string][]uint64, float64) {
-	var utxos map[string][]uint64
+	utxos := make(map[string][]uint64)
 	var calc float64
+	//定义一个map来保存以消费掉的output
+	spendOutputs := make(map[string][]int64)
+	// 创建区块链迭代器
+	it := self.NewIterator()
+	// 遍历所有区块
+	I:
+		for {
+		block := it.Next()
+		// 遍历区块的交易
+		for _, tx := range block.Transaction {
+			// 遍历交易中的所有output
+		OUTPUT:
+			for i, output := range tx.TxOutputs {
+				//fmt.Println(output)
+				// 过滤掉已花费的output
+				if spendOutputs[string(tx.TXID)] != nil {
+					// 通过交易ID 找到该次交易花费过的utxo索引值
+					for _, j := range spendOutputs[string(tx.TXID)] {
+						if int64(i) == j {
+							continue OUTPUT
+						}
+					}
+				}
+				// 添加满足条件的output
+				if output.PubKeyHash == from {
+					// 找到自己需要的utxo
+					if calc < amount {
+						utxos[string(tx.TXID)] = append(utxos[string(tx.TXID)], uint64(i))
+						calc += output.Value
+
+						if calc >= amount {
+							break I
+						}
+					}
+				}
+			}
+			if !tx.IsCoinBase() {
+				// 遍历input,找到自己花费过的utxo的集合
+				for _, input := range tx.TXInputs {
+					if input.Sig == from {
+						// 记录交易ID和该场交易下属于我的花费
+						arrayIndex := spendOutputs[string(tx.TXID)]
+						arrayIndex = append(arrayIndex, input.Index)
+					}
+				}
+			}
+		}
+		if len(block.PrevHash) == 0 {
+			fmt.Printf("区块遍历结束\n")
+			break I
+		}
+	}
 	return utxos, calc
 }
