@@ -3,11 +3,6 @@ package main
 // 命令行解析库
 import "fmt"
 
-func (self *Cli) AddBlock(data string) {
-	//self.bc.AddBlock(data)
-	fmt.Println("添加区块成功")
-}
-
 func (self *Cli) printChain() {
 	// 新建一个迭代器来打印区块
 	it := self.bc.NewIterator()
@@ -30,14 +25,14 @@ func (self *Cli) printChain() {
 }
 
 func (self *Cli) GetBalance(address string) {
-	fmt.Println("=========================="+address+"==========================")
+	fmt.Println("==========================" + address + "==========================")
 	utxos := self.bc.FindUTXOs(address)
 	for _, u := range utxos {
 		fmt.Println(u)
 	}
 	total := 0.0
 	for _, utxo := range utxos {
-		fmt.Println(utxo.PubKeyHash,utxo.Value)
+		fmt.Println(utxo.PubKeyHash, utxo.Value)
 		total += utxo.Value
 	}
 	fmt.Printf("%s的可用余额为：%f\n", address, total)

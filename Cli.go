@@ -14,7 +14,6 @@ type Cli struct {
 
 const Usage = `
 ----Usage:
-		addBlock --data Data      "添加区块"
 		printChain                "正向打印区块"
 		printChainR               "反向打印区块"
 		getBalance --address addr "获取账户余额"
@@ -30,17 +29,6 @@ func (self *Cli) Run() {
 	}
 	cmd := args[1]
 	switch cmd {
-	case "addBlock":
-		fmt.Println("添加区块")
-		if len(args) == 4 && args[2] == "--data" {
-			// 获取数据
-			data := args[3]
-			// 添加区块
-			self.AddBlock(data)
-		} else {
-			fmt.Println("参数错误")
-			fmt.Println(Usage)
-		}
 	case "printChain":
 		fmt.Println("正向打印区块")
 		self.printChain()
