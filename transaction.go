@@ -14,8 +14,8 @@ const reward = 50
 
 // 定义交易结构
 type Transaction struct {
-	TXID      []byte     // 交易ID,对整个交易的hash
-	TXInputs  []TXInput  //交易输入数组
+	TXID      []byte     // 交易ID,
+	TXInputs  []TXInput  //交易输入数组对整个交易的hash
 	TxOutputs []TXOutput //交易输出数组
 }
 

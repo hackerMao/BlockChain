@@ -2,6 +2,7 @@ package main
 // 区块
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/binary"
 	"encoding/gob"
 	"log"
@@ -42,8 +43,14 @@ func (self *Block) Serialize() []byte {
 
 // 模拟梅克尔根，只是对交易的数据作简单的拼接，而不做二叉树处理
 func (self *Block) MakeMerkalRoot() []byte {
-	//TODO
-	return []byte{}
+	// 将交易的哈希值拼接起来
+	var merkalHash []byte
+	for _, tx := range self.Transactions {
+		merkalHash = append(merkalHash, tx.TXID...)
+	}
+	finalHash := sha256.Sum256(merkalHash)
+	// 对拼接的hash进行hash
+	return finalHash[:]
 }
 
 func Deserialize(b []byte) Block {
