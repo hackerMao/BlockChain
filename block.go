@@ -25,7 +25,7 @@ type Block struct {
 	Hash []byte
 	// 数据
 	//Data []byte
-	Transaction []*Transaction
+	Transactions []*Transaction
 }
 
 func (self *Block) Serialize() []byte {
@@ -67,7 +67,7 @@ func NewBlock(PrevBlockHash []byte, txs []*Transaction) *Block {
 		Difficulty:  0,
 		Nonce:       0,
 		Hash:        []byte{},
-		Transaction: txs,
+		Transactions: txs,
 	}
 	block.MerkalRoot = block.MakeMerkalRoot()
 	// 创建一个工作量证明

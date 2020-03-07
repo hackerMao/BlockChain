@@ -64,10 +64,7 @@ func (self *Cli) Run() {
 		amount, _ := strconv.ParseFloat(args[7], 64)
 		miner := args[9]
 		data := args[11]
-		ok := self.Send(from, to, amount, miner, data)
-		if ok {
-			fmt.Println("转账成功！谢谢班长")
-		}
+		self.Send(from, to, amount, miner, data)
 	default:
 		fmt.Printf("Command '%s' not found, did you mean:\n", cmd)
 		fmt.Printf(Usage)

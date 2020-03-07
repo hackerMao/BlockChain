@@ -1,4 +1,5 @@
 package main
+
 // 交易模块
 
 import (
@@ -9,11 +10,11 @@ import (
 	"log"
 )
 
-const reward = 12.5
+const reward = 50
 
 // 定义交易结构
 type Transaction struct {
-	TXID     []byte     // 交易ID,对整个交易的hash
+	TXID      []byte     // 交易ID,对整个交易的hash
 	TXInputs  []TXInput  //交易输入数组
 	TxOutputs []TXOutput //交易输出数组
 }
@@ -65,11 +66,9 @@ func NewCoinBaseTX(address string, data string) *Transaction {
 func (self *Transaction) IsCoinBase() bool {
 	// 判断是否是挖矿交易
 	// 只有一个交易input
-	if len(self.TXInputs) == 1 {
-		// 交易ID 为空
-		// 交易的index：-1
-		input := self.TXInputs[0]
-		if bytes.Equal(input.TXid, []byte{}) && input.Index == -1 {}
+	// 交易ID 为空
+	// 交易的index：-1
+	if len(self.TXInputs) == 1 && len(self.TXInputs[0].TXid) == 0 && self.TXInputs[0].Index == -1 {
 		return true
 	}
 	return false
@@ -94,10 +93,12 @@ func NewTransaction(from, to string, amount float64, bc *BlockChain) *Transactio
 	}
 	// 创建交易输出output
 	var outputs []TXOutput
-	outputs = append(outputs, TXOutput{amount, to})
+	output := TXOutput{amount, to}
+	outputs = append(outputs, output)
 	// 找零：将剩余的转成output,转给自己
 	if resValue > amount {
-		outputs = append(outputs, TXOutput{resValue-amount, from})
+		outputs = append(outputs, TXOutput{resValue - amount, from})
+		fmt.Println("resValue-amount:", resValue-amount)
 	}
 	tx := Transaction{[]byte{}, inputs, outputs}
 	tx.SetHash()
