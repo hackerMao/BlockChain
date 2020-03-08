@@ -68,3 +68,11 @@ func (wts *Wallets) loadFile()  {
 	// 将读出来的钱包赋值给当前对象wts的钱包
 	wts.WalletsMap = wtsLocal.WalletsMap
 }
+
+func (wts *Wallets) GetAllWallets()  []string {
+	var addresses []string
+	for address := range wts.WalletsMap {
+		addresses = append(addresses, address)
+	}
+	return addresses
+}

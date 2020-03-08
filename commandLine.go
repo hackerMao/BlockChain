@@ -63,3 +63,11 @@ func (self *Cli) NewWallet() {
 	address := wts.GenerateWallet()
 	fmt.Printf("钱包地址：%s\n", address)
 }
+
+func (self *Cli) ListAddresses()  {
+	wts := NewWallets()
+	addresses := wts.GetAllWallets()
+	for index, addr := range addresses {
+		fmt.Printf("wallet[%d]: %s\n", index, addr)
+	}
+}

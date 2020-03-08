@@ -19,6 +19,7 @@ const Usage = `
 		getBalance --address addr	"获取账户余额"
 		send -f from -t to -a amount -m miner -d data "from向to转账amount比特币，由miner挖矿，并写入data"
 		newWallet					"新建一个钱包（私钥、公钥对）"
+		listAddresses				"列出所有的钱包地址"
 `
 
 func (self *Cli) Run() {
@@ -57,6 +58,9 @@ func (self *Cli) Run() {
 	case "newWallet":
 		fmt.Printf("新建一个钱包：\n")
 		self.NewWallet()
+	case "listAddresses":
+		fmt.Printf("all wallet addresses:\n")
+		self.ListAddresses()
 	default:
 		fmt.Printf("Command '%s' not found, did you mean:\n", cmd)
 		fmt.Printf(Usage)
