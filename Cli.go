@@ -14,10 +14,11 @@ type Cli struct {
 
 const Usage = `
 ----Usage:
-		printChain                "正向打印区块"
-		printChainR               "反向打印区块"
-		getBalance --address addr "获取账户余额"
+		printChain					"正向打印区块"
+		printChainR					"反向打印区块"
+		getBalance --address addr	"获取账户余额"
 		send -f from -t to -a amount -m miner -d data "from向to转账amount比特币，由miner挖矿，并写入data"
+		newWallet					"新建一个钱包（私钥、公钥对）"
 `
 
 func (self *Cli) Run() {
@@ -53,6 +54,9 @@ func (self *Cli) Run() {
 		miner := args[9]
 		data := args[11]
 		self.Send(from, to, amount, miner, data)
+	case "newWallet":
+		fmt.Printf("新建一个钱包：\n")
+		self.NewWallet()
 	default:
 		fmt.Printf("Command '%s' not found, did you mean:\n", cmd)
 		fmt.Printf(Usage)

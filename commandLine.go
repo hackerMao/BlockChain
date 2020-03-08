@@ -14,7 +14,7 @@ func (self *Cli) printChain() {
 		fmt.Printf("============================ 区块开始 ====================================================================\n")
 		fmt.Printf("当前版本号：%x\n", block.Version)
 		fmt.Printf("MerkalRoot：%x\n", block.MerkalRoot)
-		fmt.Printf("时间戳：%s\n", time.Unix(int64(block.TimeStamp), 0).Format("2006-01-02 15:04:05"))
+		fmt.Printf("时间戳：%s\n", time.Unix(int64(block.TimeStamp), 0).Format("2016-01-02 15:04:05"))
 		fmt.Printf("当前难度值：%x\n", block.Difficulty)
 		fmt.Printf("前区块哈希值：%x\n", block.PrevHash)
 		fmt.Printf("当前区块哈希值：%x\n", block.Hash)
@@ -35,7 +35,6 @@ func (self *Cli) GetBalance(address string) {
 	}
 	total := 0.0
 	for _, utxo := range utxos {
-		fmt.Println(utxo.PubKeyHash, utxo.Value)
 		total += utxo.Value
 	}
 	fmt.Printf("%s的可用余额为：%f\n", address, total)
@@ -57,4 +56,12 @@ func (self *Cli) Send(from, to string, amount float64, miner, data string) {
 	fmt.Printf("amount: %f bitcorn\n", amount)
 	fmt.Println("miner: ", miner)
 	fmt.Println("data: ", data)
+}
+
+func (self *Cli) NewWallet() {
+	wallet := NewWallet()
+	address := wallet.GenerateAddr()
+	fmt.Printf("钱包私钥：%x\n", wallet.PrivateKey)
+	fmt.Printf("钱包公钥：%x\n", string(wallet.PublicKey))
+	fmt.Printf("钱包地址：%s\n", string(address))
 }
