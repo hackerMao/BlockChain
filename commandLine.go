@@ -67,7 +67,13 @@ func (self *Cli) NewWallet() {
 func (self *Cli) ListAddresses()  {
 	wts := NewWallets()
 	addresses := wts.GetAllWallets()
-	for index, addr := range addresses {
-		fmt.Printf("wallet[%d]: %s\n", index, addr)
+	if len(addresses) == 0 {
+		fmt.Printf("                  ")
+		fmt.Printf("wallet is empty!\n")
+	} else {
+		for index, addr := range addresses {
+			fmt.Printf("                  ")
+			fmt.Printf("wallet[%d]: %s\n", index, addr)
+		}
 	}
 }

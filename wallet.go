@@ -1,4 +1,5 @@
 package main
+// 用来保存公钥私钥、生产地址
 
 import (
 	"BlockChain/base58"

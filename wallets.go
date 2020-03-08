@@ -1,4 +1,5 @@
 package main
+// 负责管理wallet
 
 import (
 	"bytes"
@@ -50,6 +51,7 @@ func (wts *Wallets) loadFile()  {
 	// 在读取之前要先确认文件是否存在，如果不存在则直接退出
 	_, err := os.Stat(walletFile)
 	if os.IsNotExist(err) {
+		//wts.WalletsMap = make(map[string]*Wallet)
 		return
 	}
 	// 读取内容
