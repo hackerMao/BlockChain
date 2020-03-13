@@ -11,10 +11,10 @@ type BlockChainIterator struct {
 	CurrentHashPointer []byte
 }
 
-func (self *BlockChain) NewIterator() *BlockChainIterator {
+func (bc *BlockChain) NewIterator() *BlockChainIterator {
 	return &BlockChainIterator{
-		self.db,
-		self.tail}
+		bc.db,
+		bc.tail}
 }
 
 

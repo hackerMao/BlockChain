@@ -5,6 +5,7 @@ package main
 //noinspection GoUnresolvedReference
 import (
 	"bytes"
+	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
@@ -103,7 +104,7 @@ func NewTransaction(from, to string, amount float64, bc *BlockChain) *Transactio
 		return nil
 	}
 	pubKey := wallet.PublicKey
-	//privateKey := wallet.PrivateKey
+	privateKey := wallet.PrivateKey
 	pubKeyHash := PublicKeyHash(pubKey)
 	// 找到合理的UTXO
 	utxos, resValue := bc.FindNeedUtxos(pubKeyHash, amount)
@@ -131,5 +132,12 @@ func NewTransaction(from, to string, amount float64, bc *BlockChain) *Transactio
 	}
 	tx := Transaction{[]byte{}, inputs, outputs}
 	tx.SetHash()
+	bc.SignTransaction(&tx, privateKey)
 	return &tx
+}
+
+//签名实现
+//参数为：私钥、inputs里所引用的交易：map[TXID]Transaction
+func (tx *Transaction) Sign(privateKey *ecdsa.PrivateKey, prevTxs map[string]Transaction) {
+	//TODO
 }

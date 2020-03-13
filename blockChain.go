@@ -3,6 +3,8 @@ package main
 //区块链
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"errors"
 	"fmt"
 	"github.com/boltdb/bolt"
 	"log"
@@ -66,10 +68,10 @@ func GenesisBlock(address string) *Block {
 	return NewBlock([]byte{}, []*Transaction{coinBase})
 }
 
-func (self *BlockChain) AddBlock(txs []*Transaction) {
+func (bc *BlockChain) AddBlock(txs []*Transaction) {
 	// 连接数据库
-	db := self.db
-	lastHash := self.tail
+	db := bc.db
+	lastHash := bc.tail
 	// 更新
 	db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(blockBucket))
@@ -82,16 +84,16 @@ func (self *BlockChain) AddBlock(txs []*Transaction) {
 		bucket.Put(block.Hash, block.Serialize())
 		bucket.Put([]byte(lastBlockHashKey), block.Hash)
 		// 更新内存中区块链的最后一个hash
-		self.tail = block.Hash
+		bc.tail = block.Hash
 		return nil
 	})
 }
 
 // 查找所有可用的UTXO
-func (self *BlockChain) FindUTXOs(pubKeyHash []byte) []TXOutput {
+func (bc *BlockChain) FindUTXOs(pubKeyHash []byte) []TXOutput {
 	var UTXO []TXOutput
 
-	txs := self.FindUTXOTransactions(pubKeyHash)
+	txs := bc.FindUTXOTransactions(pubKeyHash)
 	for _, tx := range txs {
 		for _, output := range tx.TxOutputs {
 			if bytes.Equal(pubKeyHash, output.PubKeyHash) {
@@ -102,13 +104,13 @@ func (self *BlockChain) FindUTXOs(pubKeyHash []byte) []TXOutput {
 	return UTXO
 }
 
-func (self *BlockChain) FindNeedUtxos(senderPubHash []byte, amount float64) (map[string][]uint64, float64) {
+func (bc *BlockChain) FindNeedUtxos(senderPubHash []byte, amount float64) (map[string][]uint64, float64) {
 	//找到够用的utxo集合
 	utxos := make(map[string][]uint64)
 	var calc float64
 
 	// 找到所有可用的交易
-	txs := self.FindUTXOTransactions(senderPubHash)
+	txs := bc.FindUTXOTransactions(senderPubHash)
 	// 遍历交易
 	for _, tx := range txs {
 		// 遍历output
@@ -160,7 +162,7 @@ func (bc *BlockChain) FindUTXOTransactions(senderPubHash []byte) []*Transaction 
 						}
 					}
 				}
-				if  bytes.Equal(output.PubKeyHash, senderPubHash) {
+				if bytes.Equal(output.PubKeyHash, senderPubHash) {
 					txs = append(txs, tx)
 				}
 			}
@@ -171,4 +173,38 @@ func (bc *BlockChain) FindUTXOTransactions(senderPubHash []byte) []*Transaction 
 		}
 	}
 	return txs
+}
+
+func (bc *BlockChain) FindTransactionByTXid(id []byte) (Transaction, error) {
+	it := bc.NewIterator()
+
+	for {
+		block := it.Next()
+		for _, tx := range block.Transactions {
+			if bytes.Equal(tx.TXID, id) {
+				return *tx, nil
+			}
+		}
+		if len(block.PrevHash) == 0 {
+			fmt.Printf("区块链遍历结束！\n")
+			break
+		}
+	}
+	return Transaction{}, errors.New("无效的交易ID！")
+}
+
+func (bc *BlockChain) SignTransaction(tx *Transaction, privateKey *ecdsa.PrivateKey) {
+	prevTXs := make(map[string]Transaction)
+	// 找到所有引用的交易
+	// 遍历inputs,找到目标交易
+	// 添加到prevTXs
+	for _, input := range tx.TXInputs {
+		tx, err := bc.FindTransactionByTXid(input.TXid)
+		if err != nil {
+			log.Panic(err)
+		}
+		prevTXs[string(input.TXid)] = tx
+	}
+	//签名
+	tx.Sign(privateKey, prevTXs)
 }
