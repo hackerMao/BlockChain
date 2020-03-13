@@ -6,6 +6,7 @@ package main
 import (
 	"bytes"
 	"crypto/ecdsa"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
@@ -136,8 +137,41 @@ func NewTransaction(from, to string, amount float64, bc *BlockChain) *Transactio
 	return &tx
 }
 
-//签名实现
+//签名实现：当前交易的input里的pubKey等于该input所引用的output的公钥hash
 //参数为：私钥、inputs里所引用的交易：map[TXID]Transaction
 func (tx *Transaction) Sign(privateKey *ecdsa.PrivateKey, prevTxs map[string]Transaction) {
-	//TODO
+	// 创建一个当前交易的副本
+	txCopy := tx.TrimmedCopy()
+	// 循环遍历txCopy的inputs,得到这个input索引的output的公钥哈希
+	for i, input := range txCopy.TXInputs {
+		prevTx := prevTxs[string(input.TXid)]
+		if len(prevTx.TXID) == 0 {
+			log.Panic("引用的交易无效")
+		}
+		txCopy.TXInputs[i].PublicKey = prevTx.TxOutputs[input.Index].PubKeyHash
+		// 设置TXID
+		txCopy.SetHash()
+		//还原数据，以免影响后面input的签名
+		txCopy.TXInputs[i].PublicKey = nil
+		signDataHash := txCopy.TXID
+		r, s, err := ecdsa.Sign(rand.Reader, privateKey, signDataHash)
+		if err != nil {
+			log.Panic(err)
+		}
+		signature := append(r.Bytes(), s.Bytes()...)
+		tx.TXInputs[i].Signature = signature
+	}
+}
+
+func (tx *Transaction) TrimmedCopy() Transaction {
+	var inputs []TXInput
+	var outputs []TXOutput
+
+	for _, input := range tx.TXInputs {
+		inputs = append(inputs, TXInput{input.TXid, input.Index, nil, nil})
+	}
+	for _, output := range tx.TxOutputs {
+		outputs = append(outputs, TXOutput{output.Value, output.PubKeyHash})
+	}
+	return Transaction{tx.TXID, inputs, outputs}
 }
